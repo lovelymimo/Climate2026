@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { isAdmin } from "../components/AdminLayout";
 
 // 등급 정보
 const LEVEL_INFO = {
@@ -92,6 +93,16 @@ export function MyPage() {
               </div>
             </div>
 
+            {/* 관리자 전용 */}
+            {isAdmin(user?.email) && (
+              <Link
+                to="/admin"
+                className="block w-full p-4 bg-slate-800 rounded-xl text-center font-medium hover:bg-slate-700 transition-colors"
+                style={{ color: "white" }}
+              >
+                🛡️ 관리자 페이지
+              </Link>
+            )}
           </div>
 
           {/* 오른쪽: 포인트 및 제보 기록 */}
