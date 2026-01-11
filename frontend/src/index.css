@@ -1,0 +1,919 @@
+@import "tailwindcss";
+@reference "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+/* =========================
+   Base theme (CSS variables)
+   ========================= */
+
+:root{
+  --header-h: 72px;
+  --container: 1120px;
+
+  --bg: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --line: #e5e7eb;
+
+  --primary: #1b5fbf; /* 블루계열 */
+  --primary-2: #22c55e; /* 그린 포인트 */
+}
+
+*{ box-sizing:border-box; }
+html, body { height:100%; }
+body{
+  margin:0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  letter-spacing: -0.2px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a{ color: inherit; text-decoration:none; }
+
+.container{
+  width: min(var(--container), calc(100% - 32px));
+  margin: 0 auto;
+}
+
+/* ===== App layout ===== */
+.app-root{ min-height: 100vh; }
+.app-main{
+  padding-top: var(--header-h); /* ✅ 헤더 겹침 해결 */
+  padding-bottom: 48px;
+}
+
+/* ===== Header ===== */
+.top-header{
+  position: fixed;
+  top:0; left:0; right:0;
+  height: var(--header-h);
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+  z-index: 1001; /* Leaflet maps use 400-1000, header must be above */
+}
+.header-inner{
+  height: 100%;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  min-width: 220px;
+}
+.brand-logo{
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.brand-mark{
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  display:flex; align-items:center; justify-content:center;
+  background: linear-gradient(135deg, rgba(34,197,94,.16), rgba(27,95,191,.12));
+  border: 1px solid var(--line);
+  color: var(--primary);
+  font-weight: 700;
+}
+.brand-text{ display:flex; flex-direction:column; line-height:1.1; }
+.brand-title{ font-size: 15px; font-weight: 700; }
+.brand-sub{ font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+.nav-desktop{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+}
+.nav-item{
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  transition: background .15s ease;
+}
+.nav-item:hover{ background: #f3f4f6; }
+.nav-item.is-active{
+  color: var(--primary);
+  background: rgba(27,95,191,0.08);
+}
+
+.header-actions{ display:flex; align-items:center; gap: 8px; }
+
+.auth-link{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  background: #f1f5f9;
+  transition: background 0.15s;
+}
+.auth-link:hover{ background: #e2e8f0; }
+.auth-avatar{
+  font-size: 16px;
+}
+.auth-name{
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.auth-points{
+  padding: 2px 8px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .auth-name { display: none; }
+  .auth-link { padding: 8px 10px; }
+  .auth-logout-btn { display: none; }
+}
+
+.auth-logout-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.auth-logout-btn:hover {
+  color: #0369a1;
+  border-color: #bae6fd;
+  background: #f0f9ff;
+}
+
+.drawer-logout {
+  color: #64748b !important;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+.drawer-logout:hover {
+  color: #0369a1 !important;
+  background: #f0f9ff !important;
+}
+
+.icon-btn{
+  width: 44px; height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+  cursor:pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+.icon-btn:hover{ background:#f9fafb; }
+
+/* ===== Drawer ===== */
+.drawer{ position: fixed; inset:0; z-index: 10000; pointer-events:none; }
+.drawer.open{ pointer-events:auto; }
+.drawer-backdrop{
+  position:absolute; inset:0;
+  background: rgba(15,23,42,0.45);
+  opacity:0;
+  transition: opacity .18s ease;
+}
+.drawer.open .drawer-backdrop{ opacity:1; }
+
+.drawer-panel{
+  position:absolute; top:0; right:0;
+  width: min(420px, 92vw);
+  height:100%;
+  background:#fff;
+  border-left:1px solid var(--line);
+  transform: translateX(100%);
+  transition: transform .22s ease;
+  display:flex;
+  flex-direction:column;
+}
+.drawer.open .drawer-panel{ transform: translateX(0); }
+
+.drawer-head{
+  height: var(--header-h);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--line);
+}
+.drawer-title{ font-weight: 700; }
+
+.drawer-body{ padding: 18px; display:flex; flex-direction:column; gap: 16px; }
+.drawer-brand{
+  padding: 14px;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid var(--line);
+}
+.drawer-brand-title{ font-weight: 800; }
+.drawer-brand-sub{ color: var(--muted); font-size: 13px; margin-top: 6px; line-height: 1.5; }
+
+.drawer-nav{ border: 1px solid var(--line); border-radius: 16px; overflow:hidden; }
+.drawer-link{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 14px 14px;
+  background:#fff;
+  border-bottom:1px solid var(--line);
+  font-weight: 600;
+}
+.drawer-link:last-child{ border-bottom:none; }
+.drawer-link:hover{ background:#f9fafb; }
+.drawer-link.is-active{ color: var(--primary); background: rgba(27,95,191,0.07); }
+.chev{ color: var(--muted); }
+
+.drawer-divider{
+  height: 1px;
+  background: var(--line);
+  margin: 8px 0;
+}
+
+.drawer-foot{ color: var(--muted); font-size: 12px; }
+
+/* ===== Responsive ===== */
+@media (max-width: 900px){
+  :root{ --header-h: 64px; }
+  .nav-desktop{ display:none; } /* 모바일은 햄버거만 */
+  .brand{ min-width: 160px; }
+  .icon-btn{ width: 40px; height: 40px; }
+}
+
+/* ==========================================
+   Climate Safety Hub Page System (append-only)
+   ========================================== */
+
+.cs-page { @apply min-h-[calc(100vh-72px)] bg-white text-gray-900; }
+.cs-container { @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8; }
+.cs-section { @apply py-14 sm:py-16; }
+.cs-sectionTight { @apply py-10 sm:py-12; }
+
+.cs-pageHeader { @apply flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between; }
+.cs-pageHeaderRight { @apply flex items-center gap-3; }
+
+.cs-hero { @apply relative overflow-hidden border-b border-gray-100; }
+.cs-hero:before {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(1200px 600px at 20% 0%, rgba(70, 180, 255, .18), transparent 60%),
+              radial-gradient(900px 500px at 90% 20%, rgba(80, 210, 160, .18), transparent 60%);
+  pointer-events: none;
+}
+.cs-heroGrid { @apply relative grid gap-10 py-12 sm:py-14 lg:grid-cols-2 lg:items-center; }
+.cs-heroText { @apply space-y-5; }
+.cs-badge { @apply inline-flex items-center rounded-full border border-gray-200 bg-white/70 px-3 py-1 text-xs font-semibold text-gray-700 backdrop-blur; }
+
+.cs-h1 { @apply text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl; }
+.cs-h1Accent { @apply bg-gradient-to-r from-emerald-600 to-sky-600 bg-clip-text text-transparent; }
+
+.cs-h2 { @apply text-2xl font-bold tracking-tight; }
+.cs-lead { @apply text-base leading-7 text-gray-600 sm:text-lg; }
+.cs-sub { @apply text-sm leading-6 text-gray-600; }
+
+.cs-ctaRow { @apply flex flex-wrap items-center gap-3; }
+
+.cs-btn { @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition; }
+.cs-btnSm { @apply px-3 py-1.5 text-xs; }
+.cs-btnPrimary { @apply bg-sky-600 text-white hover:bg-sky-700; }
+.cs-btnGhost { @apply border border-gray-200 bg-white text-gray-800 hover:bg-gray-50; }
+.cs-btn.is-disabled { @apply opacity-50 cursor-not-allowed hover:bg-sky-600; }
+
+.cs-pill { @apply inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700; }
+
+.cs-miniStats { @apply mt-3 grid grid-cols-3 gap-3; }
+.cs-miniStat { @apply rounded-xl border border-gray-100 bg-white/70 px-3 py-3 backdrop-blur; }
+.cs-miniStatValue { @apply text-lg font-extrabold text-gray-900; }
+.cs-miniStatLabel { @apply mt-1 text-xs text-gray-600; }
+
+.cs-heroVisual { @apply lg:pl-6; }
+.cs-heroCard { @apply rounded-2xl border border-gray-100 bg-white/80 shadow-sm backdrop-blur; }
+.cs-heroCardBody { @apply p-5; }
+
+.cs-logoWrap { @apply p-5 border-b border-gray-100; }
+.cs-logoWrapCenter { @apply flex items-center justify-center; }
+.cs-logoImg { @apply block max-h-28 w-auto max-w-full object-contain; } /* 로고 과대 문제 해결 */
+.cs-logoImgLarge { @apply block max-h-40 w-auto max-w-full object-contain; }
+.cs-logoFallback { @apply flex items-center gap-3; }
+.cs-shield { @apply flex h-12 w-12 items-center justify-center rounded-xl bg-sky-50 text-2xl; }
+.cs-logoTitle { @apply text-lg font-extrabold text-gray-900; }
+.cs-logoSub { @apply text-xs font-semibold text-gray-600; }
+
+.cs-kpiGrid { @apply grid grid-cols-3 gap-3; }
+.cs-kpi { @apply rounded-xl border border-gray-100 bg-white px-3 py-3; }
+.cs-kpiLabel { @apply text-xs text-gray-600; }
+.cs-kpiValue { @apply mt-1 text-lg font-extrabold text-gray-900; }
+
+.cs-note { @apply mt-4 rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-700; }
+
+/* 로그인 사용자 정보 카드 */
+.cs-myInfo {
+  @apply text-center;
+}
+.cs-myInfoHeader {
+  @apply flex items-center justify-center gap-2 mb-4;
+}
+.cs-myInfoName {
+  @apply text-lg font-bold text-gray-900;
+}
+.cs-myInfoBadge {
+  @apply px-2 py-1 text-xs font-semibold rounded-full bg-sky-100 text-sky-700;
+}
+.cs-myInfoStats {
+  @apply grid grid-cols-2 gap-3 mb-4;
+}
+.cs-myInfoStat {
+  @apply rounded-xl bg-gradient-to-br from-sky-50 to-blue-50 p-4 border border-sky-100;
+}
+.cs-myInfoStatValue {
+  @apply text-2xl font-extrabold text-sky-600;
+}
+.cs-myInfoStatLabel {
+  @apply text-xs text-gray-600 mt-1;
+}
+.cs-myInfoLink {
+  @apply inline-block text-sm font-medium text-sky-600 hover:text-sky-800 transition-colors;
+}
+.cs-loginPrompt {
+  @apply block mt-4 text-sm font-medium text-sky-600 hover:text-sky-800 transition-colors text-center;
+}
+
+.cs-sectionHeader { @apply mb-6; }
+.cs-featureGrid { @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-3; }
+
+.cs-card { @apply rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition hover:shadow-md; }
+.cs-cardIcon { @apply text-2xl; }
+.cs-cardTitle { @apply mt-3 text-base font-bold; }
+.cs-cardDesc { @apply mt-2 text-sm leading-6 text-gray-600; }
+.cs-link { @apply mt-3 inline-flex text-sm font-semibold text-sky-700 hover:text-sky-800; }
+
+.cs-footer { @apply border-t border-gray-100 bg-gray-50 py-10; }
+.cs-footerContent { @apply flex items-center gap-6; }
+.cs-footerLogo { @apply flex-shrink-0; }
+.cs-footerLogoImg { @apply w-32 h-32 object-contain; }
+.cs-footerInfo { @apply flex-1 flex flex-col items-start; }
+.cs-footBrand { @apply text-sm font-bold text-gray-800; }
+.cs-footText { @apply text-xs text-gray-500 mt-1; }
+.cs-footerAction { @apply flex-shrink-0; }
+.cs-footCopyright { @apply mt-8 pt-4 border-t border-gray-200 text-xs text-gray-400 text-center; }
+
+.cs-panel { @apply rounded-2xl border border-gray-100 bg-white p-5 shadow-sm; }
+.cs-panelRow { @apply grid gap-4 lg:grid-cols-3; }
+
+.cs-field { @apply space-y-2; }
+.cs-label { @apply text-xs font-bold text-gray-700; }
+.cs-input, .cs-select, .cs-textarea {
+  @apply w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none
+         focus:border-sky-400 focus:ring-2 focus:ring-sky-100;
+}
+.cs-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+.cs-textarea { @apply min-h-[120px] resize-none; }
+.cs-help { @apply text-xs text-gray-500; }
+.cs-inline { @apply flex gap-2; }
+.cs-counter { @apply text-right text-xs text-gray-500; }
+
+.cs-legendRow { @apply mt-4 flex flex-wrap items-center gap-4; }
+.cs-legend { @apply inline-flex items-center gap-2 text-xs text-gray-700; }
+.cs-dot { @apply inline-block h-2.5 w-2.5 rounded-full; }
+.cs-dotHigh { @apply bg-red-500; }
+.cs-dotMid { @apply bg-amber-500; }
+.cs-dotLow { @apply bg-emerald-500; }
+.cs-legendHint { @apply text-xs text-gray-500; }
+
+.cs-mapWrap { @apply mt-6 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm; }
+.cs-mapHeader { @apply flex flex-col gap-2 border-b border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between; }
+.cs-mapTitle { @apply text-sm text-gray-700; }
+.cs-mapTools { @apply flex items-center gap-2; }
+.cs-map { @apply relative h-[360px] sm:h-[420px]; }
+.cs-mapPlaceholder { @apply absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-sky-50 to-white text-center px-6; }
+.cs-mapBadge { @apply mb-3 rounded-full bg-white px-3 py-1 text-xs font-bold text-sky-700 border border-sky-100; }
+.cs-mapText { @apply text-base font-bold text-gray-900; }
+.cs-mapSub { @apply mt-2 text-sm text-gray-600 max-w-md; }
+
+/* 지도 범례 */
+.cs-mapLegend {
+  @apply absolute bottom-3 right-3 z-[500] bg-white/95 backdrop-blur-sm rounded-xl border border-gray-200 shadow-lg;
+  max-width: 200px;
+}
+.cs-mapLegendHeader {
+  @apply flex items-center justify-between px-3 py-2 border-b border-gray-100 cursor-pointer;
+}
+.cs-mapLegendTitle {
+  @apply text-xs font-bold text-gray-700;
+}
+.cs-mapLegendToggle {
+  @apply text-gray-400 text-[10px];
+}
+.cs-mapLegendBody {
+  @apply px-3 py-2 space-y-1.5;
+}
+.cs-mapLegendItem {
+  @apply flex items-center gap-2 text-[11px] text-gray-600;
+}
+.cs-mapLegendDot {
+  @apply w-3 h-3 rounded-sm flex-shrink-0;
+}
+.cs-mapLegendNote {
+  @apply mt-2 pt-2 border-t border-gray-100 text-[10px] text-gray-400 leading-relaxed;
+}
+.cs-mapLegendLink {
+  @apply inline-block mt-1 text-sky-600 hover:text-sky-700 hover:underline;
+}
+
+/* 기업협력 페이지 */
+.cs-partnerGrid {
+  @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+}
+.cs-partnerCard {
+  @apply rounded-2xl border border-gray-100 bg-white p-5 shadow-sm
+         hover:shadow-md transition-shadow;
+}
+.cs-partnerBadge {
+  @apply inline-flex items-center gap-1 text-[10px] text-green-700
+         bg-green-50 px-2 py-0.5 rounded-full;
+}
+.cs-processStep {
+  @apply flex flex-col items-center text-center flex-1;
+}
+.cs-processArrow {
+  @apply hidden sm:block text-gray-300 text-xl flex-shrink-0;
+}
+
+.cs-grid3 { @apply mt-6 grid gap-4 lg:grid-cols-3; }
+.cs-statCard { @apply rounded-2xl border border-gray-100 bg-white p-5 shadow-sm; }
+.cs-statLabel { @apply text-xs font-bold text-gray-700 flex items-center gap-1; }
+.cs-statHelp {
+  @apply text-gray-400 cursor-help text-[10px];
+  font-weight: normal;
+}
+.cs-statValue { @apply mt-2 text-2xl font-extrabold; }
+.cs-statDesc { @apply mt-2 text-xs text-gray-500; }
+.cs-statSource {
+  @apply mt-3 pt-2 border-t border-gray-100 text-[10px] text-gray-400;
+}
+.cs-statExplain {
+  @apply mt-2 text-[11px] text-gray-500 leading-relaxed;
+}
+.cs-riskHigh { @apply text-red-600; }
+.cs-riskMid { @apply text-amber-600; }
+.cs-riskLow { @apply text-green-600; }
+.cs-riskFacility { @apply text-purple-600; }
+.cs-statCardLoading { @apply animate-pulse; }
+.cs-statCardClickable {
+  @apply cursor-pointer transition-all hover:shadow-md hover:border-blue-200;
+}
+
+/* 모달 스타일 - Leaflet보다 위에 표시 (z-index 1000+) */
+.cs-modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000; /* Leaflet 최대 z-index(~1000)보다 높게 */
+  padding: 1rem;
+}
+.cs-modal {
+  @apply bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col;
+  position: relative;
+  z-index: 10001;
+}
+.cs-modalHeader {
+  @apply flex items-center justify-between px-6 py-4 border-b border-gray-100;
+}
+.cs-modalTitle {
+  @apply text-lg font-bold text-gray-900;
+}
+.cs-modalClose {
+  @apply w-8 h-8 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors;
+}
+.cs-modalBody {
+  @apply flex-1 overflow-y-auto p-6;
+}
+.cs-modalLoading, .cs-modalEmpty {
+  @apply text-center text-gray-500 py-12;
+}
+
+/* 침수흔적 리스트 */
+.cs-traceList {
+  @apply space-y-3;
+}
+.cs-traceItem {
+  @apply flex gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors;
+}
+.cs-traceNum {
+  @apply flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold;
+}
+.cs-traceInfo {
+  @apply flex-1 min-w-0;
+}
+.cs-traceAddress {
+  @apply font-medium text-gray-900 truncate;
+}
+.cs-traceAddressNoData {
+  @apply text-gray-500 italic;
+}
+.cs-traceNoDetail {
+  @apply text-sm text-gray-500 mt-1;
+}
+.cs-traceCause {
+  @apply text-sm text-gray-600 mt-2 p-2 bg-gray-50 rounded;
+}
+.cs-traceCauseLabel {
+  @apply font-medium text-gray-700;
+}
+.cs-traceMeta {
+  @apply text-sm text-gray-600 mt-1;
+}
+.cs-traceMetaMuted {
+  @apply text-gray-400;
+}
+.cs-traceMetaMono {
+  font-family: monospace;
+  font-size: 11px;
+}
+.cs-traceMetaGrid {
+  @apply grid grid-cols-2 gap-2 mt-2;
+}
+.cs-traceMetaItem {
+  @apply flex flex-col;
+}
+.cs-traceMetaLabel {
+  @apply text-[10px] text-gray-400 uppercase tracking-wide;
+}
+.cs-traceMetaValue {
+  @apply text-sm text-gray-700;
+}
+.cs-traceCoords {
+  @apply mt-2 text-xs text-gray-500 font-mono;
+}
+
+/* 시설 관련 */
+.cs-facilityNum {
+  @apply bg-purple-100 text-purple-700;
+}
+.cs-facilityType {
+  @apply inline-block mt-1 px-2 py-0.5 text-xs font-medium rounded-full bg-purple-50 text-purple-700;
+}
+.cs-riskBadge {
+  @apply px-2 py-0.5 rounded text-xs font-bold;
+}
+/* 위험등급별 색상 (flod_dngr_grd: 0~5) */
+.cs-riskGrade0 { /* 안전 */
+  @apply bg-green-100 text-green-700;
+}
+.cs-riskGrade1 { /* 낮음 */
+  @apply bg-lime-100 text-lime-700;
+}
+.cs-riskGrade2 { /* 보통 */
+  @apply bg-yellow-100 text-yellow-700;
+}
+.cs-riskGrade3 { /* 주의 */
+  @apply bg-orange-100 text-orange-700;
+}
+.cs-riskGrade4 { /* 경계 */
+  @apply bg-amber-200 text-amber-800;
+}
+.cs-riskGrade5 { /* 위험 */
+  @apply bg-red-100 text-red-700;
+}
+
+/* 취약사유 표시 */
+.cs-vulnerabilityReasons {
+  @apply flex flex-wrap items-center gap-1 mt-2;
+}
+.cs-vulnerabilityLabel {
+  @apply text-xs text-gray-500 mr-1;
+}
+.cs-vulnerabilityTag {
+  @apply inline-block px-2 py-0.5 text-xs font-medium rounded-full bg-red-50 text-red-600 border border-red-200;
+}
+.cs-riskYear {
+  @apply ml-1 text-[10px] font-normal opacity-70;
+}
+
+/* 개발모드 디버그 토글 */
+.cs-traceDebugToggle {
+  @apply mt-2 text-xs text-blue-600 hover:text-blue-800 cursor-pointer bg-transparent border-none p-0;
+}
+.cs-traceDebugPre {
+  @apply mt-2 p-2 bg-gray-100 rounded text-xs text-gray-700 overflow-x-auto max-h-40;
+  font-family: monospace;
+}
+
+/* 모달 서브헤더 */
+.cs-modalSubHeader {
+  @apply px-6 py-3 bg-gray-50 border-b border-gray-100;
+}
+.cs-modalSubText {
+  @apply text-sm text-gray-600;
+}
+.cs-modalLarge {
+  max-width: 800px;
+}
+
+/* 침수위험도 상세 */
+.cs-dangerDetail {
+  @apply space-y-6;
+}
+.cs-dangerGrade {
+  @apply flex items-center gap-5 p-4 rounded-xl bg-gray-50;
+}
+.cs-dangerGradeCircle {
+  @apply flex-shrink-0 w-20 h-20 rounded-full flex items-center justify-center text-2xl font-extrabold bg-white shadow;
+}
+.cs-dangerGradeText {
+  @apply flex-1;
+}
+.cs-dangerGradeLabel {
+  @apply text-sm font-bold text-gray-700;
+}
+.cs-dangerGradeDesc {
+  @apply mt-1 text-sm text-gray-600 leading-relaxed;
+}
+
+.cs-dangerStats {
+  @apply grid gap-4;
+}
+.cs-dangerStatItem {
+  @apply p-4 rounded-xl border border-gray-100 bg-white;
+}
+.cs-dangerStatLabel {
+  @apply text-xs font-bold text-gray-500 uppercase tracking-wide;
+}
+.cs-dangerStatValue {
+  @apply mt-1 text-xl font-extrabold text-gray-900;
+}
+.cs-dangerStatBar {
+  @apply mt-2 h-2 rounded-full bg-gray-100 overflow-hidden;
+}
+.cs-dangerStatBarFill {
+  @apply h-full rounded-full bg-gradient-to-r from-green-400 via-yellow-400 to-red-500;
+}
+
+.cs-dangerNote {
+  @apply p-4 rounded-xl bg-blue-50 border border-blue-100;
+}
+.cs-dangerNoteTitle {
+  @apply text-sm font-bold text-blue-800;
+}
+.cs-dangerNoteText {
+  @apply mt-1 text-sm text-blue-700 leading-relaxed;
+}
+
+.cs-formGrid { @apply grid gap-6 lg:grid-cols-[1.2fr_.8fr]; }
+
+/* 시민참여 지도 미리보기 */
+.cs-reportMapWrap {
+  @apply w-full h-[240px] rounded-xl overflow-hidden border border-gray-200;
+}
+.cs-helpLoading { @apply text-sky-600; }
+.cs-helpSuccess { @apply text-green-600; }
+.cs-helpError { @apply text-red-500; }
+
+.cs-chipRow { @apply flex flex-wrap gap-2; }
+.cs-chip { @apply rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50; }
+.cs-chip.is-active { @apply border-sky-200 bg-sky-50 text-sky-800; }
+
+.cs-upload { @apply flex cursor-pointer gap-3 rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-4 hover:bg-gray-100; }
+.cs-upload input { display:none; }
+.cs-uploadTitle { @apply text-sm font-bold text-gray-900; }
+.cs-uploadDesc { @apply mt-1 text-xs text-gray-600; }
+
+.cs-actions { @apply mt-2 space-y-2; }
+
+/* 유효성 검사 메시지 */
+.cs-validation-errors {
+  @apply mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-1;
+}
+.cs-validation-error {
+  @apply flex items-center gap-2 text-sm text-amber-700;
+}
+.cs-validation-icon {
+  @apply flex-shrink-0 w-5 h-5 flex items-center justify-center bg-amber-400 text-white text-xs font-bold rounded-full;
+}
+
+.cs-sideCard { @apply rounded-2xl border border-gray-100 bg-white p-5 shadow-sm; }
+.cs-sideTitle { @apply text-sm font-extrabold text-gray-900; }
+.cs-list { @apply mt-3 space-y-2 text-sm text-gray-700; }
+.cs-divider { @apply my-5 h-px bg-gray-100; }
+
+.cs-complete { @apply mx-auto max-w-xl rounded-2xl border border-gray-100 bg-white p-8 text-center shadow-sm; }
+.cs-completeIcon { @apply mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-2xl; }
+.cs-completePoints { @apply mt-4 space-y-2; }
+
+/* ==========================================
+   Leaflet Map & Layer Controls
+   ========================================== */
+
+/* Leaflet 컨테이너 기본 스타일 */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  background: #f8fafc;
+  font-family: inherit;
+}
+
+/* Leaflet 팝업 스타일 */
+.leaflet-popup {
+  z-index: 1000 !important;
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.leaflet-popup-content {
+  margin: 12px 14px;
+  font-size: 13px;
+}
+
+/* 레이어 탭 */
+.cs-layerTabs {
+  @apply flex flex-wrap gap-2 border-b border-gray-100 px-5 py-3;
+}
+.cs-layerTab {
+  @apply rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-700
+         transition hover:bg-gray-50 cursor-pointer;
+}
+.cs-layerTab.is-active {
+  @apply border-sky-300 bg-sky-50 text-sky-700;
+}
+
+/* 마커 토글 버튼 */
+.cs-markerToggle {
+  @apply px-3 py-1.5 text-xs font-semibold rounded-full border border-gray-200 bg-white
+         text-gray-600 cursor-pointer transition hover:bg-gray-50;
+}
+.cs-markerToggle.is-active {
+  @apply border-red-300 bg-red-50 text-red-700;
+}
+/* 취약시설 마커 토글 (주황 계열) */
+.cs-facilityMarkerToggle.is-active {
+  @apply border-orange-300 bg-orange-50 text-orange-700;
+}
+
+/* 투명도 컨트롤 */
+.cs-opacityControl {
+  @apply flex items-center gap-3;
+}
+.cs-opacityLabel {
+  @apply text-xs text-gray-600 whitespace-nowrap;
+}
+.cs-opacitySlider {
+  @apply w-20 h-1.5 rounded-full appearance-none bg-gray-200 cursor-pointer;
+}
+.cs-opacitySlider::-webkit-slider-thumb {
+  @apply appearance-none w-3.5 h-3.5 rounded-full bg-sky-600 cursor-pointer;
+}
+.cs-opacitySlider::-moz-range-thumb {
+  @apply w-3.5 h-3.5 rounded-full bg-sky-600 cursor-pointer border-0;
+}
+
+/* 마커 팝업 스타일 */
+.cs-markerPopup {
+  min-width: 150px;
+}
+.cs-markerPopupTitle {
+  @apply font-bold text-sm text-red-700 mb-2 pb-1 border-b border-gray-200;
+}
+.cs-markerPopupRow {
+  @apply text-xs text-gray-700 mt-1;
+}
+.cs-markerPopupCoord {
+  @apply text-gray-500 font-mono text-[10px];
+}
+.cs-markerPopupNoData {
+  @apply text-gray-400 italic;
+}
+.cs-markerPopupRisk {
+  @apply px-1.5 py-0.5 rounded text-[10px] font-bold inline-block;
+}
+.cs-markerPopupReasons {
+  @apply mt-2 pt-2 border-t border-gray-200;
+}
+.cs-markerPopupReasonsLabel {
+  @apply text-[10px] text-gray-500 block mb-1;
+}
+.cs-markerPopupReasonsTags {
+  @apply flex flex-wrap gap-1;
+}
+.cs-markerPopupReasonTag {
+  @apply inline-block px-1.5 py-0.5 text-[10px] font-medium rounded bg-red-50 text-red-600 border border-red-200;
+}
+
+/* 지도 에러 상태 */
+.cs-mapError {
+  @apply absolute inset-0 flex flex-col items-center justify-center bg-red-50 text-center px-6;
+}
+.cs-mapErrorIcon {
+  @apply mb-3 text-3xl text-red-400;
+}
+.cs-mapErrorText {
+  @apply text-sm font-semibold text-red-700;
+}
+.cs-mapErrorSub {
+  @apply mt-2 text-xs text-red-600 max-w-sm;
+}
+
+/* 지도 로딩 상태 */
+.cs-mapLoading {
+  @apply absolute inset-0 flex items-center justify-center bg-white/80 z-[1000];
+}
+.cs-spinner {
+  @apply w-8 h-8 border-3 border-gray-200 border-t-sky-600 rounded-full animate-spin;
+}
+
+/* 검색 행 */
+.cs-searchRow {
+  @apply flex gap-2;
+}
+.cs-searchRow .cs-input {
+  @apply flex-1;
+}
+
+/* 토스트 메시지 */
+.cs-toast {
+  @apply mt-2 rounded-lg px-3 py-2 text-sm;
+}
+.cs-toastError {
+  @apply bg-red-50 text-red-700 border border-red-200;
+}
+
+/* 통계 카드 미연결 상태 */
+.cs-statCardDisabled {
+  @apply opacity-60;
+}
+.cs-statNoData {
+  @apply text-gray-400;
+}
+
+/* 지도 프리뷰 (PartnerPage) */
+.cs-mapPreviewWrap {
+  @apply rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden;
+}
+.cs-mapPreviewHeader {
+  @apply flex flex-col gap-3 p-5 border-b border-gray-100 sm:flex-row sm:items-center sm:justify-between;
+}
+.cs-mapPreviewTitle {
+  @apply text-base font-bold text-gray-900;
+}
+.cs-mapPreviewDesc {
+  @apply text-sm text-gray-600 mt-1;
+}
+.cs-mapPreview {
+  @apply relative h-[240px] sm:h-[280px];
+}
+.cs-mapPreviewOverlay {
+  @apply absolute inset-0 flex items-center justify-center bg-transparent
+         opacity-0 hover:opacity-100 transition-opacity cursor-pointer z-[500];
+  background: rgba(15, 23, 42, 0.3);
+}
+.cs-mapPreviewCta {
+  @apply px-4 py-2 rounded-full bg-white/95 text-sm font-semibold text-gray-800 shadow-lg;
+}
+.cs-mapPreviewLegend {
+  @apply flex flex-wrap items-center gap-4 px-5 py-3 bg-gray-50 text-xs;
+}
+
+/* 지역 선택 그리드 (모달) */
+.cs-regionGrid {
+  @apply grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-[300px] overflow-y-auto;
+}
+.cs-regionItem {
+  @apply px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg border border-gray-200
+         hover:bg-gray-100 transition-colors cursor-pointer text-center;
+}
+.cs-regionItem.is-selected {
+  @apply bg-sky-100 border-sky-400 text-sky-800;
+}

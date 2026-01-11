@@ -1,0 +1,175 @@
+import type { Region } from '../types';
+
+// 경기도 시/군 더미 데이터
+export const regions: Region[] = [
+  // 시 단위
+  {
+    id: 'suwon',
+    name: '수원시',
+    type: 'city',
+    center: { lat: 37.2636, lng: 127.0286 },
+    riskLevel: 'medium',
+  },
+  {
+    id: 'seongnam',
+    name: '성남시',
+    type: 'city',
+    center: { lat: 37.4200, lng: 127.1265 },
+    riskLevel: 'high',
+  },
+  {
+    id: 'goyang',
+    name: '고양시',
+    type: 'city',
+    center: { lat: 37.6584, lng: 126.8320 },
+    riskLevel: 'high',
+  },
+  {
+    id: 'yongin',
+    name: '용인시',
+    type: 'city',
+    center: { lat: 37.2411, lng: 127.1776 },
+    riskLevel: 'medium',
+  },
+  {
+    id: 'bucheon',
+    name: '부천시',
+    type: 'city',
+    center: { lat: 37.5034, lng: 126.7660 },
+    riskLevel: 'high',
+  },
+  {
+    id: 'ansan',
+    name: '안산시',
+    type: 'city',
+    center: { lat: 37.3219, lng: 126.8309 },
+    riskLevel: 'medium',
+  },
+  {
+    id: 'anyang',
+    name: '안양시',
+    type: 'city',
+    center: { lat: 37.3943, lng: 126.9568 },
+    riskLevel: 'low',
+  },
+  {
+    id: 'namyangju',
+    name: '남양주시',
+    type: 'city',
+    center: { lat: 37.6360, lng: 127.2165 },
+    riskLevel: 'medium',
+  },
+  {
+    id: 'hwaseong',
+    name: '화성시',
+    type: 'city',
+    center: { lat: 37.1996, lng: 126.8312 },
+    riskLevel: 'low',
+  },
+  {
+    id: 'pyeongtaek',
+    name: '평택시',
+    type: 'city',
+    center: { lat: 36.9921, lng: 127.1127 },
+    riskLevel: 'medium',
+  },
+  {
+    id: 'uijeongbu',
+    name: '의정부시',
+    type: 'city',
+    center: { lat: 37.7381, lng: 127.0337 },
+    riskLevel: 'high',
+  },
+  {
+    id: 'siheung',
+    name: '시흥시',
+    type: 'city',
+    center: { lat: 37.3800, lng: 126.8028 },
+    riskLevel: 'medium',
+  },
+  {
+    id: 'paju',
+    name: '파주시',
+    type: 'city',
+    center: { lat: 37.7126, lng: 126.7610 },
+    riskLevel: 'low',
+  },
+  {
+    id: 'gimpo',
+    name: '김포시',
+    type: 'city',
+    center: { lat: 37.6153, lng: 126.7156 },
+    riskLevel: 'medium',
+  },
+  {
+    id: 'gwangmyeong',
+    name: '광명시',
+    type: 'city',
+    center: { lat: 37.4786, lng: 126.8644 },
+    riskLevel: 'high',
+  },
+  // 구 단위 (수원시)
+  {
+    id: 'suwon-jangan',
+    name: '장안구',
+    type: 'district',
+    parentId: 'suwon',
+    center: { lat: 37.3030, lng: 127.0107 },
+    riskLevel: 'low',
+  },
+  {
+    id: 'suwon-gwonseon',
+    name: '권선구',
+    type: 'district',
+    parentId: 'suwon',
+    center: { lat: 37.2578, lng: 126.9717 },
+    riskLevel: 'high',
+  },
+  {
+    id: 'suwon-paldal',
+    name: '팔달구',
+    type: 'district',
+    parentId: 'suwon',
+    center: { lat: 37.2822, lng: 127.0195 },
+    riskLevel: 'medium',
+  },
+  {
+    id: 'suwon-yeongtong',
+    name: '영통구',
+    type: 'district',
+    parentId: 'suwon',
+    center: { lat: 37.2596, lng: 127.0465 },
+    riskLevel: 'medium',
+  },
+  // 구 단위 (성남시)
+  {
+    id: 'seongnam-sujeong',
+    name: '수정구',
+    type: 'district',
+    parentId: 'seongnam',
+    center: { lat: 37.4503, lng: 127.1457 },
+    riskLevel: 'high',
+  },
+  {
+    id: 'seongnam-jungwon',
+    name: '중원구',
+    type: 'district',
+    parentId: 'seongnam',
+    center: { lat: 37.4318, lng: 127.1370 },
+    riskLevel: 'medium',
+  },
+  {
+    id: 'seongnam-bundang',
+    name: '분당구',
+    type: 'district',
+    parentId: 'seongnam',
+    center: { lat: 37.3825, lng: 127.1194 },
+    riskLevel: 'low',
+  },
+];
+
+// 경기도 중심 좌표
+export const GYEONGGI_CENTER = {
+  lat: 37.4138,
+  lng: 127.0183,
+};
