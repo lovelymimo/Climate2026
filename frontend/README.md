@@ -1,73 +1,71 @@
-# React + TypeScript + Vite
+# 기후안전허브 (Climate Safety Hub)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+경기도 침수위험 지도 및 시민제보 플랫폼
 
-Currently, two official plugins are available:
+## 배포 URL
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+https://climate2026.vercel.app
 
-## React Compiler
+## 주요 기능
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 시민용
+- **침수위험지도**: 경기도 지역별 침수위험 정보 확인
+- **시민제보**: 침수/배수 문제 제보 및 포인트 적립
+- **마이페이지**: 포인트, 등급, 제보 기록 확인
 
-## Expanding the ESLint configuration
+### 관리자용 (`/admin`)
+- **대시보드**: 전체 통계, 최근 제보 현황
+- **제보 관리**: 제보 목록 필터링, 상태 변경 (대기중/검토중/완료/반려)
+- **회원 관리**: 회원 검색, 등급별 필터링, 회원 상세 정보
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 기술 스택
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **Frontend**: React 19 + TypeScript + Vite
+- **Styling**: Tailwind CSS v4
+- **Routing**: react-router-dom v7
+- **Map**: Leaflet + react-leaflet v5
+- **Backend**: Firebase (Auth, Firestore)
+- **Deployment**: Vercel
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 로컬 개발
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 빌드
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run build
 ```
+
+## 프로젝트 구조
+
+```
+frontend/src/
+├── components/       # 공통 컴포넌트
+│   ├── Layout.tsx
+│   └── AdminLayout.tsx
+├── contexts/         # React Context
+│   └── AuthContext.tsx
+├── pages/            # 페이지 컴포넌트
+│   ├── admin/        # 관리자 페이지
+│   │   ├── AdminDashboard.tsx
+│   │   ├── AdminReports.tsx
+│   │   └── AdminUsers.tsx
+│   ├── HomePage.tsx
+│   ├── MapPage.tsx
+│   ├── ReportPage.tsx
+│   └── MyPage.tsx
+├── services/         # API 서비스
+│   ├── adminService.ts
+│   └── wfsService.ts
+└── lib/              # 라이브러리 설정
+    └── firebase.ts
+```
+
+## 라이선스
+
+Private
