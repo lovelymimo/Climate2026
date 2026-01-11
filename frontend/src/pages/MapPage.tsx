@@ -531,7 +531,7 @@ export function MapPage() {
                 onClick={() => setShowMarkers(!showMarkers)}
                 title={showMarkers ? "침수흔적 마커 숨기기" : "침수흔적 마커 표시"}
               >
-                📍 침수흔적 {markersData.length > 0 ? `${markersData.length}건` : ""}
+                📍 침수흔적 {traceLoading ? "" : `${markersData.length}건`}
                 {traceLoading && " ⏳"}
               </button>
               {/* 침수취약시설 마커 토글 */}
