@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import emailjs from "@emailjs/browser";
 import { useAuth } from "../contexts/AuthContext";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
@@ -171,8 +171,17 @@ export function ReportPage() {
   // 전송 상태
   const [isSending, setIsSending] = useState(false);
 
+  // 로그인 필요 안내 상태
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
   // 제보 제출 핸들러 (EmailJS)
   const onSubmit = async () => {
+    // 로그인 체크
+    if (!user) {
+      setShowLoginPrompt(true);
+      return;
+    }
+
     setIsSending(true);
 
     // 제보 유형 텍스트
@@ -434,6 +443,40 @@ export function ReportPage() {
             </ul>
           </div>
         </div>
+
+        {/* 로그인 필요 안내 모달 */}
+        {showLoginPrompt && (
+          <div className="cs-modalOverlay" onClick={() => setShowLoginPrompt(false)}>
+            <div className="cs-modal cs-modalSmall" onClick={(e) => e.stopPropagation()}>
+              <div className="cs-modalHeader">
+                <h2 className="cs-modalTitle">로그인이 필요합니다</h2>
+                <button
+                  className="cs-modalClose"
+                  onClick={() => setShowLoginPrompt(false)}
+                  aria-label="닫기"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="cs-modalBody">
+                <div className="cs-loginPromptContent">
+                  <p className="cs-loginPromptText">
+                    제보를 등록하려면 로그인이 필요합니다.<br />
+                    로그인하시면 <b>기후안전 포인트</b>도 적립됩니다!
+                  </p>
+                  <div className="cs-loginPromptActions">
+                    <Link to="/login" className="cs-btn cs-btnPrimary">
+                      로그인하기
+                    </Link>
+                    <Link to="/signup" className="cs-btn cs-btnGhost">
+                      회원가입
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

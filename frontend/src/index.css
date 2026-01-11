@@ -642,6 +642,20 @@ a{ color: inherit; text-decoration:none; }
 .cs-modalLarge {
   max-width: 800px;
 }
+.cs-modalSmall {
+  max-width: 400px;
+}
+
+/* 로그인 필요 안내 */
+.cs-loginPromptContent {
+  @apply text-center py-4;
+}
+.cs-loginPromptText {
+  @apply text-gray-700 leading-relaxed mb-6;
+}
+.cs-loginPromptActions {
+  @apply flex flex-col gap-3;
+}
 
 /* 침수위험도 상세 */
 .cs-dangerDetail {
